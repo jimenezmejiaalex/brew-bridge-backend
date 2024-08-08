@@ -34,21 +34,6 @@ model Profile {
   userId Int     @unique
 }
 
-model CoffeeBean {
-  id                 Int              @id @default(autoincrement())
-  name               String
-  type               String
-  traceabilityId     Int?
-  processingMethodId Int
-  flavorNotes        String?
-  roastLevel         RoastLevel
-  certification      String?
-  harvestDate        DateTime
-  products           CoffeeProduct[]
-  traceability       Traceability?    @relation(fields: [traceabilityId], references: [id])
-  processingMethod   ProcessingMethod @relation(fields: [processingMethodId], references: [id])
-}
-
 model Farm {
   id             Int             @id @default(autoincrement())
   name           String
@@ -81,21 +66,36 @@ model Specialty {
   roasters    Roaster[]
 }
 
+model CoffeeBean {
+  id                 Int              @id @default(autoincrement())
+  name               String
+  type               String
+  processingMethodId Int
+  flavorNotes        String?
+  roastLevel         RoastLevel
+  certification      String?
+  harvestDate        DateTime
+  products           CoffeeProduct[]
+  processingMethod   ProcessingMethod @relation(fields: [processingMethodId], references: [id])
+}
+
 model CoffeeProduct {
-  id        Int        @id @default(autoincrement())
-  name      String
-  beanId    Int
-  farmId    Int
-  roasterId Int
-  weight    Float
-  price     Float
-  roastDate DateTime
-  shelfLife Int
-  farm      Farm       @relation(fields: [farmId], references: [id])
-  bean      CoffeeBean @relation(fields: [beanId], references: [id])
-  roaster   Roaster    @relation(fields: [roasterId], references: [id])
-  reviews   Review[]
-  recipes   Recipe[]
+  id            Int          @id @default(autoincrement())
+  name          String
+  beanId        Int
+  farmId        Int
+  roasterId     Int
+  tracebilityId Int
+  weight        Float
+  price         Float
+  roastDate     DateTime
+  shelfLife     Int
+  farm          Farm         @relation(fields: [farmId], references: [id])
+  bean          CoffeeBean   @relation(fields: [beanId], references: [id])
+  roaster       Roaster      @relation(fields: [roasterId], references: [id])
+  tracebility   Traceability @relation(fields: [tracebilityId], references: [id])
+  reviews       Review[]
+  recipes       Recipe[]
 }
 
 model BrewMethod {
@@ -137,7 +137,6 @@ model Recipe {
   temperatureUnit    TemperatureUnit
   grindSize          GrindSize
   steps              Step[]
-  traceability       Traceability?   @relation(fields: [traceabilityId], references: [id])
   coffeeProduct      CoffeeProduct?  @relation(fields: [coffeeProductId], references: [id])
   brewMethod         BrewMethod      @relation(fields: [brewMethodId], references: [id])
 }
@@ -153,13 +152,12 @@ model Step {
 }
 
 model Traceability {
-  id          Int          @id @default(autoincrement())
-  region      String
-  variety     String
-  process     String
-  altitude    String
-  recipes     Recipe[]
-  coffeeBeans CoffeeBean[]
+  id             Int             @id @default(autoincrement())
+  region         String
+  variety        String
+  process        String
+  altitude       String
+  coffeeProducts CoffeeProduct[]
 }
 
 enum RoastLevel {
