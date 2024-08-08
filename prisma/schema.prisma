@@ -24,7 +24,7 @@ model User {
   email   String   @unique
   name    String?
   profile Profile?
-  role Role
+  role    Role
 }
 
 model Profile {
@@ -35,123 +35,131 @@ model Profile {
 }
 
 model CoffeeBean {
-  id               Int        @id @default(autoincrement())
-  name             String
-  origin           String
-  type             String
-  farm             String
-  elevation        String?
+  id                 Int              @id @default(autoincrement())
+  name               String
+  type               String
+  traceabilityId     Int?
   processingMethodId Int
-  flavorNotes      String?
-  roastProfile     String
-  certification    String?
-  harvestDate      DateTime
-  products         CoffeeProduct[]
-  processingMethod                ProcessingMethod @relation(fields: [processingMethodId], references: [id])
+  flavorNotes        String?
+  roastLevel         RoastLevel
+  certification      String?
+  harvestDate        DateTime
+  products           CoffeeProduct[]
+  traceability       Traceability?    @relation(fields: [traceabilityId], references: [id])
+  processingMethod   ProcessingMethod @relation(fields: [processingMethodId], references: [id])
+}
+
+model Farm {
+  id             Int             @id @default(autoincrement())
+  name           String
+  description    String
+  coffeeProducts CoffeeProduct[]
 }
 
 model ProcessingMethod {
-  id               Int        @id @default(autoincrement())
-  name             String
-  description      String
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
   coffeeBeans CoffeeBean[]
 }
 
 model Roaster {
-  id               Int             @id @default(autoincrement())
-  name             String
-  location         String
-  website          String?
-  contactInfo      String?
-  specialtyId      Int
-  products         CoffeeProduct[]
-  specialty Specialty @relation(fields: [specialtyId], references: [id])
+  id          Int             @id @default(autoincrement())
+  name        String
+  location    String
+  website     String?
+  contactInfo String?
+  specialtyId Int
+  products    CoffeeProduct[]
+  specialty   Specialty       @relation(fields: [specialtyId], references: [id])
 }
 
 model Specialty {
-  id               Int             @id @default(autoincrement())
-  name             String
-  description      String
-  roasters         Roaster[]
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  roasters    Roaster[]
 }
 
 model CoffeeProduct {
-  id                  Int        @id @default(autoincrement())
-  name                String
-  beanId              Int
-  roasterId           Int
-  blendOrSingleOrigin String
-  weight              Float
-  price               Float
-  roastDate           DateTime
-  shelfLife           Int
-  bean                CoffeeBean @relation(fields: [beanId], references: [id])
-  roaster             Roaster    @relation(fields: [roasterId], references: [id])
-  reviews             Review[]
-  recipes             Recipe[]
+  id        Int        @id @default(autoincrement())
+  name      String
+  beanId    Int
+  farmId    Int
+  roasterId Int
+  weight    Float
+  price     Float
+  roastDate DateTime
+  shelfLife Int
+  farm      Farm       @relation(fields: [farmId], references: [id])
+  bean      CoffeeBean @relation(fields: [beanId], references: [id])
+  roaster   Roaster    @relation(fields: [roasterId], references: [id])
+  reviews   Review[]
+  recipes   Recipe[]
 }
 
 model BrewMethod {
-  id                  Int        @id @default(autoincrement())
-  name                String
+  id                   Int      @id @default(autoincrement())
+  name                 String
   recommendedGrindSize String
-  waterTemperature    Float
-  brewingTime         Int
-  coffeeToWaterRatio  Float
-  recepies Recipe[]
+  waterTemperature     Float
+  brewingTime          Int
+  coffeeToWaterRatio   Float
+  recepies             Recipe[]
 }
 
 model Review {
-  id                  Int          @id @default(autoincrement())
-  productId           Int
-  reviewerName        String
-  rating              Int
-  comments            String?
-  reviewDate          DateTime
-  product             CoffeeProduct @relation(fields: [productId], references: [id])
+  id           Int           @id @default(autoincrement())
+  productId    Int
+  reviewerName String
+  rating       Int
+  comments     String?
+  reviewDate   DateTime
+  product      CoffeeProduct @relation(fields: [productId], references: [id])
 }
 
 model Recipe {
-  id                  Int        @id @default(autoincrement())
-  shareWithCommunity  Boolean
-  name                String
-  notes               String?
-  brewMethodId        Int
-  hasFilter           Boolean
-  filterType          String?
-  cupsCount           Int
-  traceabilityId      Int?
-  coffeeProductId     Int?
-  roastLevel          RoastLevel
-  coffeeSize          Float
-  waterSize           Float
-  ratio               Float
-  temperature         Float
-  temperatureUnit     TemperatureUnit
-  grindSize           GrindSize
-  steps               Step[]
-  traceability        Traceability? @relation(fields: [traceabilityId], references: [id])
-  coffeeProduct       CoffeeProduct? @relation(fields: [coffeeProductId], references: [id])
-  brewMethod          BrewMethod @relation(fields: [brewMethodId], references: [id])
+  id                 Int             @id @default(autoincrement())
+  shareWithCommunity Boolean
+  name               String
+  notes              String?
+  brewMethodId       Int
+  hasFilter          Boolean
+  filterType         String?
+  cupsCount          Int
+  traceabilityId     Int?
+  coffeeProductId    Int?
+  roastLevel         RoastLevel
+  coffeeSize         Float
+  waterSize          Float
+  ratio              Float
+  temperature        Float
+  temperatureUnit    TemperatureUnit
+  grindSize          GrindSize
+  steps              Step[]
+  traceability       Traceability?   @relation(fields: [traceabilityId], references: [id])
+  coffeeProduct      CoffeeProduct?  @relation(fields: [coffeeProductId], references: [id])
+  brewMethod         BrewMethod      @relation(fields: [brewMethodId], references: [id])
 }
 
 model Step {
-  id                  Int        @id @default(autoincrement())
-  recipeId            Int
-  stepType            StepType
-  amount              Float
-  duration            Int
-  notes               String?
-  recipe              Recipe @relation(fields: [recipeId], references: [id])
+  id       Int      @id @default(autoincrement())
+  recipeId Int
+  stepType StepType
+  amount   Float
+  duration Int
+  notes    String?
+  recipe   Recipe   @relation(fields: [recipeId], references: [id])
 }
 
 model Traceability {
-  id                  Int        @id @default(autoincrement())
-  region              String
-  variety             String
-  process             String
-  altitude            String
-  recipes             Recipe[]
+  id          Int          @id @default(autoincrement())
+  region      String
+  variety     String
+  process     String
+  altitude    String
+  recipes     Recipe[]
+  coffeeBeans CoffeeBean[]
 }
 
 enum RoastLevel {
