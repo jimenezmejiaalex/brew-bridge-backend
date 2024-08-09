@@ -1,5 +1,5 @@
 import {coffeeService} from "@/services";
-import {CoffeeProcessingMethod} from "@/types";
+import {CoffeeBean} from "@/types";
 import type {NextApiRequest, NextApiResponse} from 'next'
 import httpConstants from "@/constants";
 import {handleError} from "@/utils/ErrorUtils";
@@ -12,12 +12,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         switch (method) {
             case httpConstants.HTTP2_METHOD_POST: {
                 const body = req.body;
-                const processMethod = body as CoffeeProcessingMethod;
-                const result = await coffeeService.createCoffeeProcessingMethod(processMethod);
+                const coffeeBean = body as CoffeeBean;
+                const result = await coffeeService.createCoffeeBean(coffeeBean);
                 return res.status(httpConstants.HTTP_STATUS_OK).json({data: result});
             }
             case httpConstants.HTTP2_METHOD_GET: {
-                const result = await coffeeService.getAllCoffeeProcessingMethod();
+                const result = await coffeeService.getAllCoffeeBeans();
                 return res.status(httpConstants.HTTP_STATUS_OK).json({data: result});
             }
         }

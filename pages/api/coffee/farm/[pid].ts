@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
             case httpConstants.HTTP2_METHOD_PUT: {
                 const body = req.body;
-                if(!body) return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).json({data: "Not body present"});
+                if (!body) return res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).json({data: "Not body present"});
                 const result = await coffeeService.updateFarm(id, body);
                 return res.status(httpConstants.HTTP_STATUS_OK).json({data: result});
             }

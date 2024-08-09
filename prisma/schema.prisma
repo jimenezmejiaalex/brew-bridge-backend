@@ -69,7 +69,7 @@ model Specialty {
 model CoffeeBean {
   id                 Int              @id @default(autoincrement())
   name               String
-  type               String
+  coffeeSpecies      CoffeeSpecies
   processingMethodId Int
   flavorNotes        String?
   roastLevel         RoastLevel
@@ -187,4 +187,12 @@ enum StepType {
   STIR
   PREPARE
   WAIT
+}
+
+enum CoffeeSpecies {
+  ARABICA
+  ROBUSTA
+  LIBERICA
+  EXCELSA
+  OTHER
 }

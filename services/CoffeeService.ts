@@ -1,16 +1,30 @@
-import {CoffeeProcessingMethod, CoffeeProductModel, Farm, FarmModel, ProcessingMethodModel} from "@/types";
+import {
+    CoffeeBean,
+    CoffeeBeanModel,
+    CoffeeProcessingMethod,
+    CoffeeProductModel,
+    CoffeeTypeModel,
+    Farm,
+    FarmModel,
+    ProcessingMethodModel
+} from "@/types";
 import {NotFoundError} from "@/errors/NotFoundError";
 import {ErrorCode} from "@/enums/ErrorCode";
 
 
 export class CoffeeService {
     private coffeeModel: CoffeeProductModel;
+    private coffeeTypeModel: CoffeeTypeModel;
+    private coffeeBeanModel: CoffeeBeanModel;
     private coffeeProcessingMethodModel: ProcessingMethodModel;
     private farmModel: FarmModel;
-    constructor(coffeeModel: CoffeeProductModel, coffeeProcessingMethodModel: ProcessingMethodModel, farmModel: FarmModel) {
+
+    constructor(coffeeModel: CoffeeProductModel, coffeeProcessingMethodModel: ProcessingMethodModel, farmModel: FarmModel, coffeeBeanModel: CoffeeBeanModel, coffeeTypeModel: CoffeeTypeModel) {
         this.coffeeModel = coffeeModel;
         this.coffeeProcessingMethodModel = coffeeProcessingMethodModel;
         this.farmModel = farmModel;
+        this.coffeeBeanModel = coffeeBeanModel;
+        this.coffeeTypeModel = coffeeTypeModel;
     }
 
     async createCoffeeProcessingMethod(processingMethod: CoffeeProcessingMethod): Promise<CoffeeProcessingMethod> {
@@ -32,7 +46,7 @@ export class CoffeeService {
     async getCoffeeProcessingMethod(id: number): Promise<CoffeeProcessingMethod> {
         const result = await this.validateProcessingMethodExists(id);
 
-        const coffeeProcessingMethod :CoffeeProcessingMethod = {
+        const coffeeProcessingMethod: CoffeeProcessingMethod = {
             id: result.id,
             name: result.name,
             description: result.description
@@ -63,7 +77,7 @@ export class CoffeeService {
 
     async createFarm(farm: Farm): Promise<Farm> {
         const result = await this.farmModel.create({
-            data : {
+            data: {
                 name: farm.name,
                 description: farm.description
             }
@@ -102,7 +116,74 @@ export class CoffeeService {
     async deleteFarm(id: number): Promise<void> {
         const result = await this.validateFarmExists(id);
         const deletedItem = await this.farmModel.delete({where: {id: id}});
-        return ;
+        return;
+    }
+
+    // Create a new CoffeeBean
+    async createCoffeeBean(coffeeBean: CoffeeBean): Promise<CoffeeBean> {
+        const result = await this.coffeeBeanModel.create({
+            data: {
+                name: coffeeBean.name,
+                processingMethodId: coffeeBean.processingMethodId,
+                flavorNotes: coffeeBean.flavorNotes,
+                roastLevel: coffeeBean.roastLevel,
+                certification: coffeeBean.certification,
+                harvestDate: coffeeBean.harvestDate,
+                coffeeSpecies: coffeeBean.coffeeSpecies
+            }
+        });
+        return result;
+    }
+
+    // Get all CoffeeBeans
+    async getAllCoffeeBeans(): Promise<Array<CoffeeBean>> {
+        const result = await this.coffeeBeanModel.findMany({
+            include: {
+                processingMethod: true,
+                products: true
+            }
+        });
+        return result;
+    }
+
+    // Get a CoffeeBean by ID
+    async getCoffeeBeanById(id: number): Promise<CoffeeBean> {
+        const result = await this.validateCoffeeBeanExists(id);
+        return result;
+    }
+
+    // Update a CoffeeBean by ID
+    async updateCoffeeBean(id: number, body: CoffeeBean): Promise<CoffeeBean> {
+        await this.validateCoffeeBeanExists(id);
+        const updatedCoffeeBean = await this.coffeeBeanModel.update({
+            where: {id: id},
+            data: {
+                name: body.name,
+                processingMethodId: body.processingMethodId,
+                flavorNotes: body.flavorNotes,
+                roastLevel: body.roastLevel,
+                certification: body.certification,
+                harvestDate: body.harvestDate,
+                coffeeSpecies: body.coffeeSpecies
+            }
+        });
+        return updatedCoffeeBean;
+    }
+
+    // Delete a CoffeeBean by ID
+    async deleteCoffeeBean(id: number): Promise<void> {
+        await this.validateCoffeeBeanExists(id);
+        await this.coffeeBeanModel.delete({where: {id: id}});
+        return;
+    }
+
+    // Utility method to validate if a CoffeeBean exists by ID
+    private async validateCoffeeBeanExists(id: number): Promise<CoffeeBean> {
+        const result = await this.coffeeBeanModel.findUnique({where: {id: id}});
+        if (!result) {
+            throw new NotFoundError(`CoffeeBean with ID ${id} does not exist.`, ErrorCode.NOT_FOUND);
+        }
+        return result;
     }
 
     private async validateFarmExists(id: number): Promise<Farm> {

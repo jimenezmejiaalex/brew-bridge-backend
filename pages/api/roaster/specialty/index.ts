@@ -1,4 +1,4 @@
-import {coffeeService, roasterService} from "@/services";
+import {roasterService} from "@/services";
 import {RoasterSpecialty} from "@/types";
 import type {NextApiRequest, NextApiResponse} from 'next'
 import httpConstants from "@/constants";

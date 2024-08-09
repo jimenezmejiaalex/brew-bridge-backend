@@ -4,6 +4,7 @@ export const userModel = prisma.user;
 export const processingMethodModel = prisma.processingMethod;
 export const profileModel = prisma.profile;
 export const coffeeBeanModel = prisma.coffeeBean;
+export const coffeeTypeModel = prisma.coffeeType;
 export const roasterModel = prisma.roaster;
 export const coffeeProductModel = prisma.coffeeProduct;
 export const brewMethodModel = prisma.brewMethod;
