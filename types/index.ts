@@ -1,17 +1,17 @@
 import {
     CoffeeBean as CoffeeBeanPrisma,
-    CoffeeProduct,
-    CoffeeType as CoffeeTypePrisma,
+    CoffeeProduct as CoffeeProductPrisma,
     Farm as FarmPrisma,
     Prisma,
     ProcessingMethod as ProcessingMethodPrisma,
     Roaster as RoasterPrisma,
-    Specialty as SpecialtyPrisma
+    Specialty as SpecialtyPrisma,
+    CoffeeRegion as CoffeeRegionPrisma,
 } from ".prisma/client";
 
-export type Coffee = CoffeeProduct;
+export type CoffeeProduct = CoffeeProductPrisma;
 export type CoffeeBean = CoffeeBeanPrisma;
-export type CoffeeType = CoffeeTypePrisma;
+export type CoffeeRegion = CoffeeRegionPrisma;
 export type CoffeeProcessingMethod = ProcessingMethodPrisma;
 export type Roaster = RoasterPrisma;
 export type RoasterSpecialty = SpecialtyPrisma;
@@ -23,4 +23,4 @@ export type ProcessingMethodModel = Prisma.ProcessingMethodDelegate;
 export type RoasterModel = Prisma.RoasterDelegate;
 export type SpecialtyModel = Prisma.SpecialtyDelegate;
 export type FarmModel = Prisma.FarmDelegate;
-export type CoffeeTypeModel = Prisma.CoffeeTypeDelegate;
+export type CoffeeRegionModel = Prisma.CoffeeRegionDelegate;

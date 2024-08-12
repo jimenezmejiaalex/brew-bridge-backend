@@ -2,7 +2,7 @@ import {CoffeeService} from "@/services/CoffeeService";
 import {
     coffeeBeanModel,
     coffeeProductModel,
-    coffeeTypeModel,
+    coffeeRegionModel,
     farmModel,
     processingMethodModel,
     roasterModel,
@@ -10,5 +10,12 @@ import {
 } from "@/models";
 import {RoasterService} from "@/services/RoasterService";
 
-export const coffeeService = new CoffeeService(coffeeProductModel, processingMethodModel, farmModel, coffeeBeanModel, coffeeTypeModel);
 export const roasterService = new RoasterService(roasterModel, roasterSpecialtyModel);
+
+export const coffeeService = new CoffeeService(
+    coffeeProductModel,
+    processingMethodModel,
+    farmModel,
+    coffeeBeanModel,
+    coffeeRegionModel,
+    roasterService);

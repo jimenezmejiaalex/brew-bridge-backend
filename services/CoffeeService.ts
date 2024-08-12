@@ -1,30 +1,38 @@
 import {
     CoffeeBean,
     CoffeeBeanModel,
-    CoffeeProcessingMethod,
-    CoffeeProductModel,
-    CoffeeTypeModel,
+    CoffeeProcessingMethod, CoffeeProduct,
+    CoffeeProductModel, CoffeeRegion,
+    CoffeeRegionModel,
     Farm,
     FarmModel,
     ProcessingMethodModel
 } from "@/types";
 import {NotFoundError} from "@/errors/NotFoundError";
 import {ErrorCode} from "@/enums/ErrorCode";
+import {RoasterService} from "@/services/RoasterService";
 
 
 export class CoffeeService {
-    private coffeeModel: CoffeeProductModel;
-    private coffeeTypeModel: CoffeeTypeModel;
+    private coffeeProductModel: CoffeeProductModel;
+    private coffeeRegionModel: CoffeeRegionModel;
     private coffeeBeanModel: CoffeeBeanModel;
     private coffeeProcessingMethodModel: ProcessingMethodModel;
     private farmModel: FarmModel;
+    private roasterService: RoasterService;
 
-    constructor(coffeeModel: CoffeeProductModel, coffeeProcessingMethodModel: ProcessingMethodModel, farmModel: FarmModel, coffeeBeanModel: CoffeeBeanModel, coffeeTypeModel: CoffeeTypeModel) {
-        this.coffeeModel = coffeeModel;
+    constructor(coffeeProductModel: CoffeeProductModel,
+                coffeeProcessingMethodModel: ProcessingMethodModel,
+                farmModel: FarmModel,
+                coffeeBeanModel: CoffeeBeanModel,
+                coffeeRegionModel: CoffeeRegionModel,
+                roasterService: RoasterService) {
+        this.coffeeProductModel = coffeeProductModel;
         this.coffeeProcessingMethodModel = coffeeProcessingMethodModel;
         this.farmModel = farmModel;
         this.coffeeBeanModel = coffeeBeanModel;
-        this.coffeeTypeModel = coffeeTypeModel;
+        this.coffeeRegionModel = coffeeRegionModel;
+        this.roasterService = roasterService;
     }
 
     async createCoffeeProcessingMethod(processingMethod: CoffeeProcessingMethod): Promise<CoffeeProcessingMethod> {
@@ -129,7 +137,8 @@ export class CoffeeService {
                 roastLevel: coffeeBean.roastLevel,
                 certification: coffeeBean.certification,
                 harvestDate: coffeeBean.harvestDate,
-                coffeeSpecies: coffeeBean.coffeeSpecies
+                coffeeSpecies: coffeeBean.coffeeSpecies,
+                coffeeRegionId: coffeeBean.coffeeRegionId
             }
         });
         return result;
@@ -138,10 +147,7 @@ export class CoffeeService {
     // Get all CoffeeBeans
     async getAllCoffeeBeans(): Promise<Array<CoffeeBean>> {
         const result = await this.coffeeBeanModel.findMany({
-            include: {
-                processingMethod: true,
-                products: true
-            }
+            include: {processingMethod: true, coffeeRegion: true, products: true}
         });
         return result;
     }
@@ -177,11 +183,182 @@ export class CoffeeService {
         return;
     }
 
-    // Utility method to validate if a CoffeeBean exists by ID
+    // Create a new CoffeeRegion
+    async createCoffeeRegion(data: CoffeeRegion): Promise<CoffeeRegion> {
+        const newRegion = await this.coffeeRegionModel.create({
+            data: {
+                description: data.description,
+                region: data.region,
+                altitude: data.altitude
+            }
+        });
+        return newRegion;
+    }
+
+    // Get all CoffeeRegions
+    async getAllCoffeeRegions(): Promise<CoffeeRegion[]> {
+        const regions = await this.coffeeRegionModel.findMany();
+        return regions;
+    }
+
+    // Get a CoffeeRegion by ID
+    async getCoffeeRegionById(id: number): Promise<CoffeeRegion | null> {
+        const region = await this.coffeeRegionModel.findUnique({
+            where: {id}
+        });
+        return region;
+    }
+
+    // Update a CoffeeRegion by ID
+    async updateCoffeeRegion(id: number, data: CoffeeRegion): Promise<CoffeeRegion> {
+        await this.validateCoffeeRegionExists(id);
+        const updatedRegion = await this.coffeeRegionModel.update({
+            where: {id},
+            data: {
+                description: data.description,
+                region: data.region,
+                altitude: data.altitude
+            }
+        });
+        return updatedRegion;
+    }
+
+    // Delete a CoffeeRegion by ID
+    async deleteCoffeeRegion(id: number): Promise<void> {
+        await this.validateCoffeeRegionExists(id);
+        const result = await this.coffeeRegionModel.delete({
+            where: {id}
+        });
+        return;
+    }
+
+    // Create a new CoffeeProduct
+    async createCoffeeProduct(data: CoffeeProduct): Promise<CoffeeProduct> {
+        await this.validateRelatedEntities(data.beanId, data.farmId, data.roasterId);
+
+        return this.coffeeProductModel.create({
+            data,
+            include: {
+                bean: true,
+                farm: true,
+                roaster: true,
+                reviews: true,
+                recipes: true,
+            },
+        });
+    }
+
+    // Get a CoffeeProduct by ID
+    async getCoffeeProductById(id: number): Promise<CoffeeProduct | null> {
+        return this.coffeeProductModel.findUnique({
+            where: { id },
+            include: {
+                bean: true,
+                farm: true,
+                roaster: true,
+                reviews: true,
+                recipes: true,
+            },
+        });
+    }
+
+    // Update a CoffeeProduct by ID
+    async updateCoffeeProduct(id: number, data: CoffeeProduct): Promise<CoffeeProduct> {
+        const productExists = await this.coffeeProductModel.findUnique({
+            where: { id },
+        });
+        if (!productExists) {
+            throw new Error(`CoffeeProduct with id ${id} does not exist`);
+        }
+
+        if (data.beanId || data.farmId || data.roasterId) {
+            await this.validateRelatedEntities(
+                data.beanId as number || productExists.beanId,
+                data.farmId as number || productExists.farmId,
+                data.roasterId as number || productExists.roasterId
+            );
+        }
+
+        return this.coffeeProductModel.update({
+            where: { id },
+            data,
+            include: {
+                bean: true,
+                farm: true,
+                roaster: true,
+                reviews: true,
+                recipes: true,
+            },
+        });
+    }
+
+    // Delete a CoffeeProduct by ID
+    async deleteCoffeeProduct(id: number): Promise<CoffeeProduct> {
+        const productExists = await this.coffeeProductModel.findUnique({
+            where: { id },
+        });
+        if (!productExists) {
+            throw new Error(`CoffeeProduct with id ${id} does not exist`);
+        }
+
+        return this.coffeeProductModel.delete({
+            where: { id },
+            include: {
+                bean: true,
+                farm: true,
+                roaster: true,
+                reviews: true,
+                recipes: true,
+            },
+        });
+    }
+
+    // List all CoffeeProducts
+    async listCoffeeProducts(): Promise<CoffeeProduct[]> {
+        return this.coffeeProductModel.findMany({
+            include: {
+                bean: true,
+                farm: true,
+                roaster: true,
+                reviews: true,
+                recipes: true,
+            },
+        });
+    }
+
+    private async validateRelatedEntities(beanId: number, farmId: number, roasterId: number) {
+        const [beanExists, farmExists, roasterExists] = await Promise.all([
+            this.coffeeBeanModel.findUnique({ where: { id: beanId } }),
+            this.farmModel.findUnique({ where: { id: farmId } }),
+            this.roasterService.getRoasterById(roasterId)
+        ]);
+
+        if (!beanExists) {
+            throw new NotFoundError(`CoffeeBean with id ${beanId} does not exist`, ErrorCode.NOT_FOUND);
+        }
+        if (!farmExists) {
+            throw new NotFoundError(`Farm with id ${farmId} does not exist`, ErrorCode.NOT_FOUND);
+        }
+        if (!roasterExists) {
+            throw new NotFoundError(`Roaster with id ${roasterId} does not exist`, ErrorCode.NOT_FOUND);
+        }
+    }
+
     private async validateCoffeeBeanExists(id: number): Promise<CoffeeBean> {
-        const result = await this.coffeeBeanModel.findUnique({where: {id: id}});
+        const result = await this.coffeeBeanModel.findUnique({
+            where: {id: id},
+            include: {processingMethod: true, coffeeRegion: true, products: true}
+        });
         if (!result) {
             throw new NotFoundError(`CoffeeBean with ID ${id} does not exist.`, ErrorCode.NOT_FOUND);
+        }
+        return result;
+    }
+
+    private async validateCoffeeRegionExists(id: number): Promise<CoffeeRegion> {
+        const result = await this.coffeeRegionModel.findUnique({where: {id: id}});
+        if (!result) {
+            throw new NotFoundError(`CoffeeRegion with ID ${id} does not exist.`, ErrorCode.NOT_FOUND);
         }
         return result;
     }
