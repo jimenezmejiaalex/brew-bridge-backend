@@ -13,3 +13,4 @@ export const recipeModel = prisma.recipe;
 export const stepModel = prisma.step;
 export const roasterSpecialtyModel = prisma.specialty;
 export const farmModel = prisma.farm;
+export const stepTypeModel = prisma.stepType;

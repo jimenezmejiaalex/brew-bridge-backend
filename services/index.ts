@@ -1,6 +1,9 @@
-import {coffeeService, roasterService} from "@/config/Services";
+import {coffeeService, roasterService, reviewService, stepService, recipeService} from "@/config/Services";
 
 export {
     coffeeService,
-    roasterService
+    roasterService,
+    reviewService,
+    stepService,
+    recipeService
 }
