@@ -387,6 +387,7 @@ export class CoffeeService {
       select: {
         id: true,
         name: true,
+        methodImage: true,
       },
       take: 15,
     });
