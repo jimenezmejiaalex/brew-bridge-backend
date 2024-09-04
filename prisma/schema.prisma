@@ -114,6 +114,7 @@ model BrewMethod {
   brewingTime          Int
   coffeeToWaterRatio   Float
   recepies             Recipe[]
+  methodImage          MethodImage
 }
 
 model Review {
@@ -192,4 +193,30 @@ enum CoffeeSpecies {
   LIBERICA
   EXCELSA
   OTHER
+}
+
+enum MethodImage {
+  AEROPRESS
+  CHEMEX
+  MOKA
+  ESPRESSO
+  FRENCH_PRESS
+  POUR_OVER
+  MOKA_POT
+  COLD_BREW
+  DRIP_COFFEE
+  SIPHON
+  TURKISH_COFFEE
+  CLEVER_DRIPPER
+  V60
+  KALITA_WAVE
+  PERCOLATOR
+  NITRO_COLD_BREW
+  FLAT_WHITE
+  MACCHIATO
+  RISTRETTO
+  AFFOGATO
+  CAFE_AU_LAIT
+  VANDOLA
+  NONE
 }
