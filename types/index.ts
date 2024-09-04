@@ -44,8 +44,13 @@ export interface Recipe extends RecipePrisma {
   coffeeProduct?: CoffeeProduct | null;
 }
 
-export type RecipeIdAndName = Pick<Recipe, "id" | "name">;
-export type BrewMethodIdAndName = Pick<BrewMethod, "id" | "name">;
+export type RecipeIdAndName = Pick<Recipe, "id" | "name"> & {
+  brewMethod: Pick<BrewMethod, "methodImage">;
+};
+export type BrewMethodIdAndName = Pick<
+  BrewMethod,
+  "id" | "name" | "methodImage"
+>;
 export type CoffeeProductIdAndNAme = Pick<CoffeeProduct, "id" | "name">;
 
 export interface Step extends StepPrisma {

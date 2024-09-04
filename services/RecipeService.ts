@@ -257,6 +257,11 @@ export class RecipeService {
       select: {
         id: true,
         name: true,
+        brewMethod: {
+          select: {
+            methodImage: true,
+          },
+        },
       },
     });
   }
